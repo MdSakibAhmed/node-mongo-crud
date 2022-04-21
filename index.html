@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Hy i am calling from node js</h1>
+
+    <form action="http://localhost:4000/addProduct" method="POST">
+        <input type="text" placeholder="name" name="name">
+        <input type="text" placeholder="price" name="price">
+        <input type="text" placeholder="quantity" name="quantity">
+        <button type="submit">submit</button>
+    </form>
+    <div id="container">
+        <input type="text">
+    </div>
+    <div id="update"></div>
+    <script>
+        function loadAllProducts() {
+            fetch("http://localhost:4000/products").then(res => res.json()).then(data => {
+                document.getElementById("container").innerHTML = ""
+                data.forEach(element => {
+                    const container = document.getElementById("container")
+
+                    const p = document.createElement("p");
+                    p.innerHTML = ` ${element.name}  ---price: ${element.price} quantity:  ${element.quantity} <button onclick="loadProduct('${element._id}')">update</button>
+             <button onclick="deleteProduct(event,'${element._id}')">Delete</button>`
+
+
+
+
+                    container.appendChild(p)
+
+                });
+
+
+            })
+        }
+
+        loadAllProducts()
+
+
+        function loadProduct(id) {
+            console.log(id);
+            fetch(`http://localhost:4000/product/${id}`).then(res => res.json()).then(data => {
+                console.log(data);
+                const update = document.getElementById("update")
+                update.innerHTML = `<h3> ID: ${data._id}</h3>
+                
+                
+                <input name="price" id="price" placeholder="price" value=${data.price} type="text">
+                <br/>
+                <input name="quantity" id="quantity" placeholder="quantity" value=${data.quantity} type="text">
+                <br/>
+                <button onclick="updateProduct('${data._id}')">submit</button>
+
+                `
+            })
+
+        }
+
+        function updateProduct(id) {
+            console.log(id);
+            // const name = document.getElementById("name")
+            // console.log(name);
+            const price = document.getElementById("price").value;
+            const quantity = document.getElementById("quantity").value;
+            const product = {
+                id,
+                price,
+                quantity
+            }
+
+            fetch(`http://localhost:4000/update/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(product)
+            }).then(res => res.json()).then(result => {
+                //console.log(data);
+                if (result) {
+                loadAllProducts()  
+                document.getElementById("update").innerHTML = "" 
+
+                }
+               
+            })
+
+        }
+
+        function deleteProduct(event, id) {
+            console.log(event);
+            console.log(id);
+            fetch(`http://localhost:4000/delete/${id}`, {
+                method: "DELETE"
+            }).then(res => res.json()).then(result => {
+                console.log(result);
+                if (result) {
+                    event.target.parentNode.style.display = "none";
+                }
+
+
+            })
+
+        }
+    </script>
+</body>
+
+</html>
